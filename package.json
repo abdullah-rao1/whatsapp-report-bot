@@ -1,0 +1,22 @@
+{
+  "name": "whatsapp-report-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pulls daily report messages from per-person WhatsApp groups, summarizes them with Llama (via Groq), and saves them into the Team Report Tracker's Supabase database.",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.9",
+    "@supabase/supabase-js": "^2.45.4",
+    "express": "^4.19.2",
+    "qrcode": "^1.5.4",
+    "dotenv": "^16.4.5",
+    "pino": "^9.3.2"
+  }
+}
