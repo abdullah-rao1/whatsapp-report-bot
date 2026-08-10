@@ -6,14 +6,23 @@ const {
 } = require('@whiskeysockets/baileys');
 const QRCode = require('qrcode');
 const pino = require('pino');
-const { insertMessage } = require('./supabase');
+const { insertMessage, getGroupMappings } = require('./supabase');
 
 const AUTH_DIR = process.env.WHATSAPP_AUTH_DIR || './auth_info';
 
 let sock = null;
 let latestQrDataUrl = null;
 let connectionState = 'connecting'; // connecting | qr | open | closed
+let mappedGroupJids = new Set();
 
+   async function refreshMappedGroups() {
+     try {
+       const mappings = await getGroupMappings();
+       mappedGroupJids = new Set(mappings.map(m => m.group_jid));
+     } catch (e) {
+       console.error('Failed to refresh group mappings:', e.message);
+     }
+   }
 function getStatus() {
   return { state: connectionState, qr: connectionState === 'qr' ? latestQrDataUrl : null };
 }
@@ -43,6 +52,8 @@ async function start() {
   });
 
   sock.ev.on('creds.update', saveCreds);
+  await refreshMappedGroups();
+   setInterval(refreshMappedGroups, 60 * 1000); // pick up new mappings every minute
 
   sock.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect, qr } = update;
@@ -80,6 +91,7 @@ async function start() {
       try {
         const jid = msg.key.remoteJid;
         if (!jid || !jid.endsWith('@g.us')) continue; // only care about group messages
+        if (!mappedGroupJids.has(jid)) continue; // skip groups you haven't mapped to a person
         const text = extractText(msg);
         if (!text) continue; // skip non-text (stickers, reactions, etc.)
 
