@@ -60,14 +60,15 @@ async function start() {
     }
 
     if (connection === 'close') {
-      connectionState = 'closed';
-      const statusCode = lastDisconnect?.error?.output?.statusCode;
-      const loggedOut = statusCode === DisconnectReason.loggedOut;
-      console.log('WhatsApp connection closed.', loggedOut ? '(logged out — delete auth_info and re-scan)' : '(reconnecting…)');
-      if (!loggedOut) {
-        setTimeout(start, 3000);
-      }
-    }
+     connectionState = 'closed';
+     const statusCode = lastDisconnect?.error?.output?.statusCode;
+     const loggedOut = statusCode === DisconnectReason.loggedOut;
+     console.log('WhatsApp connection closed. statusCode=' + statusCode + ' message=' + (lastDisconnect?.error?.message || lastDisconnect?.error));
+     console.log(loggedOut ? '(logged out — delete auth_info and re-scan)' : '(reconnecting…)');
+     if (!loggedOut) {
+       setTimeout(start, 3000);
+     }
+   }
   });
 
   // Live message capture — this is how "previous messages" get accumulated.
