@@ -37,7 +37,7 @@ ${transcript}
 
 Respond with ONLY a JSON object (no markdown, no code fences) in this exact shape:
 {
-  "report": "a clear, well-written first-person summary of the actual work reported that day, in 2-6 sentences or short bullet points separated by newlines. If no real work content was found, use an empty string.",
+  "report": "a clear, well-written first-person summary of the actual work reported that day, in 2-3 sentences or short bullet points separated by newlines. If no real work content was found, use an empty string.",
   "hours": "the number of hours worked if explicitly mentioned anywhere (e.g. '7.5'), otherwise an empty string",
   "mode": "one of Office, Remote, WFH, Field if explicitly mentioned or clearly implied, otherwise an empty string"
 }`;
@@ -51,7 +51,7 @@ Respond with ONLY a JSON object (no markdown, no code fences) in this exact shap
     body: JSON.stringify({
       model: MODEL,
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.2,
+      temperature: 0,
       response_format: { type: 'json_object' }
     })
   });
