@@ -59,7 +59,7 @@ async function start() {
       console.log('WhatsApp connected.');
     }
 
-       if (connection === 'close') {
+   if (connection === 'close') {
      connectionState = 'closed';
      const statusCode = lastDisconnect?.error?.output?.statusCode;
      const loggedOut = statusCode === DisconnectReason.loggedOut;
