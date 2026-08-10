@@ -1,15 +1,22 @@
+// Polyfill the Web Crypto API for environments/Node builds where it isn't
+// registered as a global yet (Baileys needs globalThis.crypto).
 if (!globalThis.crypto) {
-    globalThis.crypto = require('crypto').webcrypto;
+  globalThis.crypto = require('crypto').webcrypto;
 }
-require('dotenv').config();
 
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const whatsapp = require('./whatsapp');
 const { summarizeDayMessages } = require('./summarize');
 const db = require('./supabase');
 
 const app = express();
+
+// The tracker's frontend (on Netlify) calls this backend directly from the
+// browser, so CORS must be open. Everything here is already gated by
+// requireAdmin below, so an open CORS policy doesn't expose anything extra.
+app.use(cors());
 app.use(express.json());
 
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
