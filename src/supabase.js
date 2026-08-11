@@ -45,16 +45,39 @@ async function insertMessage({ groupJid, sender, senderName, body, msgTs }) {
   if (error) console.error('Failed to store WhatsApp message:', error.message);
 }
 
-// Fetch all captured messages for a group on a given local calendar date (YYYY-MM-DD)
+// ---- Reporting-day window ----
+// A "day" for message-pulling purposes runs 11:00 AM to 10:59:59 AM the next
+// day, Pakistan Standard Time (UTC+5, no daylight saving). Both are
+// configurable via env vars if the workday start time or timezone ever change.
+const REPORT_DAY_START_HOUR = Number(process.env.REPORT_DAY_START_HOUR ?? 11);
+const REPORT_TZ_OFFSET_HOURS = Number(process.env.REPORT_TZ_OFFSET_HOURS ?? 5); // Asia/Karachi = UTC+5
+
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+// Converts "11:00 AM on dateStr, local PKT" into the equivalent UTC instant.
+function localHourToUtcIso(dateStr, hour) {
+  const utcHour = hour - REPORT_TZ_OFFSET_HOURS; // e.g. 11 AM PKT = 06:00 UTC
+  const d = new Date(dateStr + 'T00:00:00.000Z');
+  d.setUTCHours(d.getUTCHours() + utcHour);
+  return d.toISOString();
+}
+
+// Fetch all captured messages for a "reporting day" that starts at
+// REPORT_DAY_START_HOUR on dateStr and ends just before REPORT_DAY_START_HOUR
+// on the following day (both in Pakistan time).
 async function getMessagesForGroupOnDate(groupJid, dateStr) {
-  const startIso = `${dateStr}T00:00:00.000Z`;
-  const endIso = `${dateStr}T23:59:59.999Z`;
+  const startIso = localHourToUtcIso(dateStr, REPORT_DAY_START_HOUR);
+  const endIso = localHourToUtcIso(addDays(dateStr, 1), REPORT_DAY_START_HOUR); // exclusive upper bound
   const { data, error } = await sb
     .from('whatsapp_messages')
     .select('sender, sender_name, body, msg_ts')
     .eq('group_jid', groupJid)
     .gte('msg_ts', startIso)
-    .lte('msg_ts', endIso)
+    .lt('msg_ts', endIso)
     .order('msg_ts', { ascending: true });
   if (error) throw error;
   return data || [];
