@@ -34,12 +34,12 @@ Messages:
 """
 ${transcript}
 """
-
+You are a summary report generator which will generate summaries for the higher authorities, consice but accurate and comprehensive, not extras nor even less, jusst a well structured summary. respond as fast as speed of light. 
 Respond with ONLY a JSON object (no markdown, no code fences) in this exact shape:
 {
-  "report": "a clear, well-written first-person summary of the actual work reported that day, in 2-3 sentences or short bullet points separated by newlines. If no real work content was found, use an empty string.",
-  "hours": "the number of hours worked if explicitly mentioned anywhere (e.g. '7.5'), otherwise an empty string",
-  "mode": "one of Office, Remote, WFH, Field if explicitly mentioned or clearly implied, otherwise an empty string"
+  "report": "a clear, well-written summary of the actual work reported that day, in 2-3 sentences only. the summary might be consice accurate and comprehensive and also be completly covered. make it as much small as possible, like 2-3 sentences or lines only. If no real work content was found, use an empty string.",
+  "hours": "the number of hours worked if explicitly mentioned anywhere (e.g. '7.5'), or if someone mentions the time e.g. from ... to ..., then calculate the hours worked and return that hours worked, otherwise an empty string",
+  "mode": "one of Office, Remote, WFH,on site work is also considered as office, and if someone mentions hybrid mode make it work from office, or Field if explicitly mentioned or clearly implied, otherwise an empty string"
 }`;
 
   const res = await fetch(GROQ_URL, {
